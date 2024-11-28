@@ -12,7 +12,7 @@ node_modules
 /temp
 
 # Laravel Specific Directories
-/vendor
+/vendor/
 /public/build
 /public/hot
 /public/storage
