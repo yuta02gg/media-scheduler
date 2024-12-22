@@ -21,13 +21,13 @@
     </div>
 
     <div class="cta-section">
-      <!-- ログインしていない場合 -->
       <router-link v-if="!isLoggedIn" to="/register" class="cta-button">新規登録</router-link>
       <router-link v-if="!isLoggedIn" to="/login" class="cta-button">ログイン</router-link>
       
-      <!-- ログインしている場合 -->
-      <router-link v-if="isLoggedIn" to="/register" class="cta-button">新規登録</router-link>
-      <router-link v-if="isLoggedIn" to="/login" class="cta-button">別のアカウントでログイン</router-link>
+      <router-link v-if="isLoggedIn" to="/mypage" class="cta-button">マイページ</router-link>
+      <button v-if="isLoggedIn" @click="logout" class="cta-button">ログアウト</button>
+      
+      <router-link v-if="isAdmin" to="/admin/dashboard" class="cta-button admin-button">管理者ダッシュボード</router-link>
     </div>
   </div>
 </template>
@@ -39,28 +39,36 @@ import { useStore } from 'vuex';
 export default {
   name: 'HomePage',
   setup() {
-    const store = useStore(); // Vuexストアを使用
+    const store = useStore();
     const isLoggedIn = computed(() => store.getters.isAuthenticated);
+    const isAdmin = computed(() => store.getters.isAdmin);
 
     const checkLoginStatus = async () => {
       try {
-        await store.dispatch('checkAuth'); // Vuexのアクションを呼び出す
+        await store.dispatch('checkAuth');
       } catch (error) {
         console.error('ログイン状態の確認に失敗しました。', error);
       }
     };
 
-    onMounted(() => {
-      checkLoginStatus();
-    });
+    const logout = async () => {
+      try {
+        await store.dispatch('logout');
+      } catch (error) {
+        console.error('ログアウトに失敗しました。', error);
+      }
+    };
+
+    onMounted(checkLoginStatus);
 
     return {
       isLoggedIn,
+      isAdmin,
+      logout,
     };
   },
 };
 </script>
-
 
 <style scoped>
 .homepage-container {
@@ -137,14 +145,24 @@ export default {
   margin: 0 10px;
   background-color: #ff7e5f;
   color: white;
+  border: none;
   border-radius: 5px;
   text-decoration: none;
   font-weight: bold;
+  cursor: pointer;
   transition: background-color 0.3s;
+}
+
+.admin-button {
+  background-color: #6c757d;
 }
 
 .cta-button:hover {
   background-color: #ff5e3a;
+}
+
+.admin-button:hover {
+  background-color: #5a6268;
 }
 
 @keyframes fadeIn {

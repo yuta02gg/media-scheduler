@@ -15,10 +15,12 @@
           <li v-if="isAuthenticated"><router-link to="/mypage">マイページ</router-link></li>
           <li><router-link to="/search">作品検索</router-link></li>
           <li v-if="isAuthenticated"><router-link to="/schedule">スケジュール管理</router-link></li>
-          <!-- <li v-if="isAuthenticated"><router-link to="/reminder">リマインダー設定</router-link></li> -->
           <li><router-link to="/reviews">レビューランキング</router-link></li>
           <li v-if="isAuthenticated"><router-link to="/settings">設定</router-link></li>
-          <li v-if="isAuthenticated"><a href="#" @click.prevent="confirmLogout">ログアウト</a></li>
+          <li v-if="isAdmin"><router-link to="/admin/dashboard">管理者ダッシュボード</router-link></li>
+          <li v-if="isAuthenticated">
+            <a href="#" @click.prevent="confirmLogout">ログアウト</a>
+          </li>
         </ul>
       </nav>
     </header>
@@ -35,7 +37,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -45,17 +47,24 @@ export default {
     const store = useStore()
     const route = useRoute()
     const router = useRouter()
+
     const isAuthenticated = computed(() => store.getters.isAuthenticated)
+    const isAdmin = computed(() => store.getters.isAdmin)
     const isMenuActive = ref(false)
 
     const toggleMenu = () => {
       isMenuActive.value = !isMenuActive.value
     }
 
-    const logout = () => {
-      store.dispatch('logout')
-      // ログアウト後にホームページにリダイレクト
-      router.push('/')
+    const logout = async () => {
+      try {
+        await store.dispatch('logout')
+        // ログアウト後にホームページにリダイレクト
+        router.push('/')
+      } catch (error) {
+        console.error('ログアウトに失敗しました。', error)
+        alert('ログアウトに失敗しました。再度お試しください。')
+      }
     }
 
     const confirmLogout = () => {
@@ -64,12 +73,23 @@ export default {
       }
     }
 
-    const pageTitle = computed(() => {
-      return route.meta.title || ''
+    const pageTitle = computed(() => route.meta.title || '')
+
+    const checkLoginStatus = async () => {
+      try {
+        await store.dispatch('checkAuth')
+      } catch (error) {
+        console.error('ログイン状態の確認に失敗しました。', error)
+      }
+    }
+
+    onMounted(() => {
+      checkLoginStatus()
     })
 
     return {
       isAuthenticated,
+      isAdmin,
       isMenuActive,
       toggleMenu,
       confirmLogout,
@@ -173,6 +193,7 @@ a {
     width: 200px;
     transform: translateX(100%);
     transition: transform 0.3s ease-in-out;
+    z-index: 1000;
   }
 
   .nav-menu.is-active {
@@ -182,6 +203,10 @@ a {
   .nav-menu li {
     margin: 0;
     padding: 1em;
+  }
+
+  .nav-menu li a {
+    display: block;
   }
 }
 </style>

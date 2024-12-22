@@ -11,29 +11,24 @@ class RegisterController extends Controller
 {
     public function register(Request $request)
     {
-        // バリデーション
-        $validatedData = $request->validate([
-            'username' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
+        $data = $request->validate([
+            'username' => 'required|string|max:50',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
         ]);
 
-        // ユーザーの作成
         $user = User::create([
-            'username' => $validatedData['username'],
-            'email' => $validatedData['email'],
-            // パスワードをハッシュ化して保存
-            'password' => Hash::make($validatedData['password']),
+            'username' => $data['username'],
+            'email'    => $data['email'],
+            'password' => Hash::make($data['password']),
         ]);
 
-        // トークンの生成（API 認証の場合）
         $token = $user->createToken('authToken')->plainTextToken;
 
-        // レスポンスを返す
         return response()->json([
-            'user' => $user,
+            'user'         => $user,
             'access_token' => $token,
-            'token_type' => 'Bearer',
-        ], 201);
+            'token_type'   => 'Bearer',
+        ]);
     }
 }

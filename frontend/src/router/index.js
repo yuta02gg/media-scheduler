@@ -1,4 +1,5 @@
 // src/router/index.js
+
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/Home.vue'
 import UserLogin from '../views/Login.vue'
@@ -12,6 +13,13 @@ import ReviewPost from '../views/ReviewPost.vue'
 import ReviewList from '../views/ReviewList.vue'
 import ReviewRanking from '../views/ReviewRanking.vue'
 import UserSettings from '../views/Settings.vue'
+
+// 管理者関連のコンポーネントは動的インポートで遅延読み込み
+const AdminDashboard = () => import('../views/AdminDashboard.vue')
+const AdminUserManagement = () => import('../views/AdminUserManagement.vue')
+const AdminReviewManagement = () => import('../views/AdminReviewManagement.vue')
+
+import store from '../store' // Vuex ストアをインポート
 
 const routes = [
   {
@@ -97,11 +105,54 @@ const routes = [
     component: UserSettings,
     meta: { title: '設定' },
   },
+  // 管理者ダッシュボード
+  {
+    path: '/admin/dashboard',
+    name: 'AdminDashboard',
+    component: AdminDashboard,
+    meta: { title: '管理者ダッシュボード', requiresAuth: true, isAdmin: true },
+  },
+  // 管理者ユーザー管理
+  {
+    path: '/admin/users',
+    name: 'AdminUserManagement',
+    component: AdminUserManagement,
+    meta: { title: 'ユーザー管理', requiresAuth: true, isAdmin: true },
+  },
+  // 管理者レビュー管理
+  {
+    path: '/admin/reviews',
+    name: 'AdminReviewManagement',
+    component: AdminReviewManagement,
+    meta: { title: 'レビュー管理', requiresAuth: true, isAdmin: true },
+  },
+  // ユーザーごとのレビュー管理
+  {
+    path: '/admin/users/:id/reviews',
+    name: 'AdminUserReviews',
+    component: AdminReviewManagement,
+    props: true,
+    meta: { title: 'ユーザーのレビュー管理', requiresAuth: true, isAdmin: true },
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+// ナビゲーションガードの設定
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const isAdminRoute = to.matched.some(record => record.meta.isAdmin)
+
+  if (requiresAuth && !store.getters.isAuthenticated) {
+    next({ name: 'Login' })
+  } else if (requiresAuth && isAdminRoute && !store.getters.isAdmin) {
+    next({ name: 'Home' }) // 適切なエラーページにリダイレクト
+  } else {
+    next()
+  }
 })
 
 export default router

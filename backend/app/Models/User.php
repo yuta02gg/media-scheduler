@@ -7,16 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\Media; // Mediaモデルをインポート
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable; 
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
         'username',
         'email',
         'password',
+        'is_admin',
     ];
 
     protected $hidden = [
@@ -24,16 +24,25 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    // $castsをプロパティとして定義
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'is_admin' => 'boolean',
     ];
 
     public function media()
     {
         return $this->belongsToMany(Media::class, 'user_media')
-                ->withPivot('status', 'reminder_time', 'notification_type')
-                ->withTimestamps();
+                    ->withPivot('status', 'reminder_time', 'notification_type')
+                    ->withTimestamps();
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
     }
 }
