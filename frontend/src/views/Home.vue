@@ -21,53 +21,67 @@
     </div>
 
     <div class="cta-section">
-      <router-link v-if="!isLoggedIn" to="/register" class="cta-button">新規登録</router-link>
-      <router-link v-if="!isLoggedIn" to="/login" class="cta-button">ログイン</router-link>
-      
-      <router-link v-if="isLoggedIn" to="/mypage" class="cta-button">マイページ</router-link>
-      <button v-if="isLoggedIn" @click="logout" class="cta-button">ログアウト</button>
-      
-      <router-link v-if="isAdmin" to="/admin/dashboard" class="cta-button admin-button">管理者ダッシュボード</router-link>
+      <router-link v-if="!isLoggedIn" to="/register" class="cta-button">
+        新規登録
+      </router-link>
+      <router-link v-if="!isLoggedIn" to="/login" class="cta-button">
+        ログイン
+      </router-link>
+
+      <router-link v-if="isLoggedIn" to="/mypage" class="cta-button">
+        マイページ
+      </router-link>
+      <button v-if="isLoggedIn" @click="logout" class="cta-button">
+        ログアウト
+      </button>
+
+      <router-link
+        v-if="isAdmin"
+        to="/admin/dashboard"
+        class="cta-button admin-button"
+      >
+        管理者ダッシュボード
+      </router-link>
     </div>
   </div>
 </template>
 
 <script>
-import { computed, onMounted } from 'vue';
-import { useStore } from 'vuex';
+import { computed, onMounted } from 'vue'
+import { useStore } from 'vuex'
 
 export default {
   name: 'HomePage',
   setup() {
-    const store = useStore();
-    const isLoggedIn = computed(() => store.getters.isAuthenticated);
-    const isAdmin = computed(() => store.getters.isAdmin);
+    const store = useStore()
+    const isLoggedIn = computed(() => store.getters.isAuthenticated)
+    const isAdmin = computed(() => store.getters.isAdmin)
 
     const checkLoginStatus = async () => {
       try {
-        await store.dispatch('checkAuth');
+        await store.dispatch('checkAuth')
       } catch (error) {
-        console.error('ログイン状態の確認に失敗しました。', error);
+        console.error('ログイン状態の確認に失敗しました。', error)
       }
-    };
+    }
 
     const logout = async () => {
       try {
-        await store.dispatch('logout');
+        await store.dispatch('logout')
       } catch (error) {
-        console.error('ログアウトに失敗しました。', error);
+        console.error('ログアウトに失敗しました。', error)
       }
-    };
+    }
 
-    onMounted(checkLoginStatus);
+    onMounted(checkLoginStatus)
 
     return {
       isLoggedIn,
       isAdmin,
       logout,
-    };
+    }
   },
-};
+}
 </script>
 
 <style scoped>

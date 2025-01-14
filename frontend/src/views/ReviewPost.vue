@@ -4,25 +4,48 @@
     <form @submit.prevent="submitReview" class="review-form">
       <div class="input-group">
         <label for="work">作品を選択:</label>
-        <select v-model="selectedWork" id="work" required class="form-select">
+        <select
+          v-model="selectedWork"
+          id="work"
+          required
+          class="form-select"
+        >
           <option disabled value="">選択してください</option>
-          <option v-for="work in registeredWorks" :key="work.id" :value="work">
+          <option
+            v-for="work in registeredWorks"
+            :key="work.id"
+            :value="work"
+          >
             {{ getTitle(work) }}
           </option>
         </select>
       </div>
       <div class="input-group">
         <label for="rating">評価:</label>
-        <select v-model="rating" id="rating" required class="form-select">
+        <select
+          v-model="rating"
+          id="rating"
+          required
+          class="form-select"
+        >
           <option disabled value="">選択してください</option>
-          <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
+          <option v-for="n in 5" :key="n" :value="n">
+            {{ n }}
+          </option>
         </select>
       </div>
       <div class="input-group">
         <label for="comment">コメント:</label>
-        <textarea v-model="comment" id="comment" placeholder="コメントを入力" class="form-textarea"></textarea>
+        <textarea
+          v-model="comment"
+          id="comment"
+          placeholder="コメントを入力"
+          class="form-textarea"
+        ></textarea>
       </div>
-      <button type="submit" class="submit-button">投稿する</button>
+      <button type="submit" class="submit-button">
+        投稿する
+      </button>
     </form>
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
   </div>
@@ -47,15 +70,17 @@ export default {
     const errorMessage = ref('')
     const loading = ref(true)
 
+    // 登録済み作品の取得
     const loadRegisteredWorks = async () => {
       try {
         const response = await axios.get('/user/registered-works')
         registeredWorks.value = response.data
 
-        // mediaType と mediaId が提供されている場合、対応する作品を選択
+        // URLパラメータがあればそれを初期選択
         if (mediaType && mediaId) {
           const preSelectedWork = registeredWorks.value.find(
-            (work) => work.media_type === mediaType && work.tmdb_id == mediaId
+            (work) =>
+              work.media_type === mediaType && work.tmdb_id == mediaId
           )
           if (preSelectedWork) {
             selectedWork.value = preSelectedWork
@@ -69,21 +94,21 @@ export default {
       }
     }
 
+    // レビュー投稿
     const submitReview = async () => {
       if (!selectedWork.value) {
         errorMessage.value = '作品を選択してください。'
         return
       }
-
       try {
         await axios.post(
           `/media/${selectedWork.value.media_type}/${selectedWork.value.tmdb_id}/reviews`,
           {
             rating: rating.value,
-            comment: comment.value
+            comment: comment.value,
           }
         )
-        // フォームをリセット
+        // 成功時リセット
         selectedWork.value = ''
         rating.value = ''
         comment.value = ''
@@ -99,13 +124,9 @@ export default {
       }
     }
 
-    const getTitle = (work) => {
-      return work.title || work.name || 'タイトル不明'
-    }
+    const getTitle = (work) => work.title || work.name || 'タイトル不明'
 
-    onMounted(() => {
-      loadRegisteredWorks()
-    })
+    onMounted(loadRegisteredWorks)
 
     return {
       registeredWorks,
@@ -114,10 +135,10 @@ export default {
       comment,
       errorMessage,
       loading,
+      getTitle,
       submitReview,
-      getTitle
     }
-  }
+  },
 }
 </script>
 
@@ -126,7 +147,6 @@ export default {
   margin-top: 2em;
 }
 
-/* 既存のスタイルをそのまま使用 */
 .review-form {
   display: flex;
   flex-direction: column;

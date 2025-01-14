@@ -7,16 +7,38 @@
     </div>
     <ul v-else-if="registeredWorks.length > 0" class="works-list">
       <li v-for="work in registeredWorks" :key="work.id" class="work-item">
-        <!-- 画像をリンクに変更してホバーアニメーションを追加 -->
-        <router-link :to="`/work/${work.media_type}/${work.tmdb_id}`" class="poster-link">
-          <img :src="getPosterUrl(work.poster_path)" :alt="`${getTitle(work)}のポスター画像`" class="poster-img" />
+        <!-- 画像をリンク化 -->
+        <router-link
+          :to="`/work/${work.media_type}/${work.tmdb_id}`"
+          class="poster-link"
+        >
+          <img
+            :src="getPosterUrl(work.poster_path)"
+            :alt="`${getTitle(work)}のポスター画像`"
+            class="poster-img"
+          />
         </router-link>
         <div class="work-info">
-          <router-link :to="`/work/${work.media_type}/${work.tmdb_id}`" class="work-title">{{ getTitle(work) }}</router-link>
+          <router-link
+            :to="`/work/${work.media_type}/${work.tmdb_id}`"
+            class="work-title"
+          >
+            {{ getTitle(work) }}
+          </router-link>
           <!-- レビュー投稿へのリンク -->
-          <router-link :to="`/review/${work.media_type}/${work.tmdb_id}`" class="review-link">レビューを書く</router-link>
+          <router-link
+            :to="`/review/${work.media_type}/${work.tmdb_id}`"
+            class="review-link"
+          >
+            レビューを書く
+          </router-link>
           <!-- スケジュールに追加ボタン -->
-          <button @click="openScheduleModal(work)" class="schedule-button">スケジュールに追加</button>
+          <button
+            @click="openScheduleModal(work)"
+            class="schedule-button"
+          >
+            スケジュールに追加
+          </button>
         </div>
       </li>
     </ul>
@@ -53,6 +75,7 @@ export default {
     const selectedWork = ref(null)
     const modalMessage = ref('')
 
+    // 登録済み作品の取得
     const loadRegisteredWorks = async () => {
       try {
         const response = await axios.get('/user/registered-works')
@@ -65,14 +88,12 @@ export default {
       }
     }
 
-    const getPosterUrl = (path) => {
-      return path ? `https://image.tmdb.org/t/p/w200${path}` : '/placeholder-image.jpg'
-    }
+    const getPosterUrl = (path) =>
+      path ? `https://image.tmdb.org/t/p/w200${path}` : '/placeholder-image.jpg'
 
-    const getTitle = (work) => {
-      return work.title || work.name || 'タイトル不明'
-    }
+    const getTitle = (work) => work.title || work.name || 'タイトル不明'
 
+    // スケジュール追加モーダルを開く
     const openScheduleModal = (work) => {
       selectedWork.value = work
       selectedDate.value = ''
@@ -80,6 +101,7 @@ export default {
       showScheduleModal.value = true
     }
 
+    // モーダルを閉じる
     const closeScheduleModal = () => {
       showScheduleModal.value = false
       selectedWork.value = null
@@ -87,28 +109,30 @@ export default {
       modalMessage.value = ''
     }
 
+    // スケジュールに追加
     const addToSchedule = async () => {
       if (!selectedDate.value) {
         modalMessage.value = '日付を選択してください。'
         return
       }
-
       try {
-        // 重複チェックのために現在のスケジュールを取得
+        // 既存のスケジュールを取得して重複チェック
         const response = await axios.get('/schedule')
         const existingEvents = response.data
 
         const isDuplicate = existingEvents.some(
           (event) =>
-            event.title === getTitle(selectedWork.value) && event.start === selectedDate.value
+            event.title === getTitle(selectedWork.value) &&
+            event.start === selectedDate.value
         )
 
         if (isDuplicate) {
-          modalMessage.value = '同じ日に同じ作品が既にスケジュールに登録されています。'
+          modalMessage.value =
+            '同じ日に同じ作品が既にスケジュールに登録されています。'
           return
         }
 
-        // スケジュールに追加
+        // スケジュール登録
         await axios.post('/schedule', {
           title: getTitle(selectedWork.value),
           date: selectedDate.value,
@@ -125,9 +149,9 @@ export default {
       }
     }
 
-    const modalWorkTitle = computed(() => {
-      return selectedWork.value ? getTitle(selectedWork.value) : ''
-    })
+    const modalWorkTitle = computed(() =>
+      selectedWork.value ? getTitle(selectedWork.value) : ''
+    )
 
     onMounted(() => {
       loadRegisteredWorks()
@@ -137,14 +161,16 @@ export default {
       registeredWorks,
       loading,
       errorMessage,
-      getPosterUrl,
-      getTitle,
       showScheduleModal,
       selectedDate,
+      selectedWork,
+      modalMessage,
+      loadRegisteredWorks,
+      getPosterUrl,
+      getTitle,
       openScheduleModal,
       closeScheduleModal,
       addToSchedule,
-      modalMessage,
       modalWorkTitle,
     }
   },
@@ -152,7 +178,6 @@ export default {
 </script>
 
 <style scoped>
-/* マイページのスタイル */
 .mypage {
   padding: 2em;
 }
@@ -208,14 +233,12 @@ export default {
   color: #007bff;
 }
 
-/* ローディング表示 */
 .loading {
   text-align: center;
   font-size: 1.2em;
   color: #555;
 }
 
-/* レビューリンクのスタイル */
 .review-link {
   margin-top: 0.5em;
   padding: 0.5em 1em;
@@ -232,7 +255,6 @@ export default {
   background-color: #0056b3;
 }
 
-/* スケジュールボタンのスタイル */
 .schedule-button {
   margin-top: 0.5em;
   padding: 0.5em 1em;
@@ -249,14 +271,14 @@ export default {
   background-color: #218838;
 }
 
-/* モーダルのスタイル */
+/* モーダル */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -278,7 +300,8 @@ export default {
   justify-content: center;
 }
 
-.add-button, .close-button {
+.add-button,
+.close-button {
   margin: 0 10px;
   padding: 0.5em 1.5em;
   font-size: 1em;

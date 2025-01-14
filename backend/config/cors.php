@@ -6,7 +6,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:8080'], // フロントエンドのURL
+    'allowed_origins' => ['http://localhost:8080'], // フロントエンドURLを指定
 
     'allowed_origins_patterns' => [],
 
@@ -17,5 +17,4 @@ return [
     'max_age' => 0,
 
     'supports_credentials' => true,
-
 ];

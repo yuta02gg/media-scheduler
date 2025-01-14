@@ -3,25 +3,62 @@
     <h1>ユーザー登録</h1>
     <form @submit.prevent="register" class="register-form">
       <div class="input-group">
-        <input v-model="username" type="text" placeholder="ユーザー名" required class="form-input"/>
+        <input
+          v-model="username"
+          type="text"
+          placeholder="ユーザー名"
+          required
+          class="form-input"
+        />
       </div>
       <div class="input-group">
-        <input v-model="email" type="email" placeholder="メールアドレス" required class="form-input"/>
+        <input
+          v-model="email"
+          type="email"
+          placeholder="メールアドレス"
+          required
+          class="form-input"
+        />
       </div>
       <div class="input-group password-group">
-        <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="パスワード" required class="form-input" />
-        <button type="button" @click="toggleShowPassword" class="toggle-button">
+        <input
+          :type="showPassword ? 'text' : 'password'"
+          v-model="password"
+          placeholder="パスワード"
+          required
+          class="form-input"
+        />
+        <button
+          type="button"
+          @click="toggleShowPassword"
+          class="toggle-button"
+        >
           {{ showPassword ? '非表示' : '表示' }}
         </button>
       </div>
-      <p v-if="password.length > 0 && password.length < 6" class="error">パスワードは6文字以上必要です。</p>
-      
-      <div class="input-group password-group">
-        <input :type="showPassword ? 'text' : 'password'" v-model="password_confirmation" placeholder="パスワード確認" required class="form-input" />
-      </div>
-      <p v-if="password !== password_confirmation && password_confirmation.length > 0" class="error">パスワードが一致しません。</p>
+      <p v-if="password.length > 0 && password.length < 6" class="error">
+        パスワードは6文字以上必要です。
+      </p>
 
-      <button type="submit" :disabled="isSubmitDisabled" class="submit-button">登録</button>
+      <div class="input-group password-group">
+        <input
+          :type="showPassword ? 'text' : 'password'"
+          v-model="password_confirmation"
+          placeholder="パスワード確認"
+          required
+          class="form-input"
+        />
+      </div>
+      <p
+        v-if="password !== password_confirmation && password_confirmation.length > 0"
+        class="error"
+      >
+        パスワードが一致しません。
+      </p>
+
+      <button type="submit" :disabled="isSubmitDisabled" class="submit-button">
+        登録
+      </button>
     </form>
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
   </div>
@@ -50,7 +87,8 @@ export default {
     }
 
     const isSubmitDisabled = computed(() => {
-      return password.value.length < 6 || password.value !== password_confirmation.value
+      return password.value.length < 6 ||
+        password.value !== password_confirmation.value
     })
 
     const register = async () => {
@@ -65,7 +103,7 @@ export default {
         router.push('/mypage')
       } catch (error) {
         errorMessage.value = '登録に失敗しました。入力内容を確認してください。'
-        console.error(error)
+        console.error('登録エラー:', error)
       }
     }
 
@@ -80,7 +118,7 @@ export default {
       isSubmitDisabled,
       register,
     }
-  }
+  },
 }
 </script>
 

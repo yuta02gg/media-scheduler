@@ -29,93 +29,83 @@
   </div>
 </template>
 
-
-
 <script>
-import { ref, onMounted } from 'vue';
-import axios from '../axios';
+import { ref, onMounted } from 'vue'
+import axios from '../axios'
 
 export default {
   name: 'UserSettings',
   setup() {
-    const username = ref(''); // ユーザー名
-    const email = ref(''); // メールアドレス
-    const newPassword = ref(''); // 新しいパスワード
-    const newPasswordConfirmation = ref(''); // パスワード確認
+    const username = ref('')
+    const email = ref('')
+    const newPassword = ref('')
+    const newPasswordConfirmation = ref('')
 
-    // ユーザー情報の取得
+    // ユーザー情報取得
     const fetchUser = async () => {
       try {
-        const response = await axios.get('/user');
-        username.value = response.data.username; // ユーザー名を取得
-        email.value = response.data.email; // メールアドレスを取得
+        const response = await axios.get('/user')
+        username.value = response.data.username
+        email.value = response.data.email
       } catch (error) {
-        console.error(error);
-        alert('ユーザー情報の取得に失敗しました');
+        console.error(error)
+        alert('ユーザー情報の取得に失敗しました')
       }
-    };
+    }
 
-    // ユーザー設定の更新
+    // 設定を更新
     const updateSettings = async () => {
       try {
-        // 新しいパスワードが入力されている場合のバリデーション
         if (newPassword.value || newPasswordConfirmation.value) {
           if (newPassword.value !== newPasswordConfirmation.value) {
-            alert('新しいパスワードが一致しません');
-            return;
+            alert('新しいパスワードが一致しません')
+            return
           }
         }
-
         const data = {
-          username: username.value, // ユーザー名
-          email: email.value, // メールアドレス
-        };
-
-        // パスワード変更のデータを追加
-        if (newPassword.value) {
-          data.new_password = newPassword.value;
-          data.new_password_confirmation = newPasswordConfirmation.value;
+          username: username.value,
+          email: email.value,
         }
+        if (newPassword.value) {
+          data.new_password = newPassword.value
+          data.new_password_confirmation = newPasswordConfirmation.value
+        }
+        await axios.put('/user', data)
+        alert('設定を更新しました')
 
-        await axios.put('/user', data);
-        alert('設定を更新しました');
-
-        // パスワードフィールドのクリア
-        newPassword.value = '';
-        newPasswordConfirmation.value = '';
+        // フィールドをクリア
+        newPassword.value = ''
+        newPasswordConfirmation.value = ''
       } catch (error) {
-        console.error(error);
+        console.error(error)
         if (error.response && error.response.data) {
-          alert(error.response.data.message);
+          alert(error.response.data.message)
         } else {
-          alert('設定の更新に失敗しました');
+          alert('設定の更新に失敗しました')
         }
       }
-    };
+    }
 
-    // アカウント削除の確認と実行
+    // アカウント削除確認
     const confirmDeleteAccount = () => {
       if (confirm('本当にアカウントを削除しますか？この操作は取り消せません。')) {
-        deleteAccount();
+        deleteAccount()
       }
-    };
+    }
 
+    // アカウント削除
     const deleteAccount = async () => {
       try {
-        await axios.delete('/user');
-        alert('アカウントが削除されました');
-        // ログインページにリダイレクト
-        window.location.href = '/login';
+        await axios.delete('/user')
+        alert('アカウントが削除されました')
+        window.location.href = '/login'
       } catch (error) {
-        console.error(error);
-        alert('アカウントの削除に失敗しました');
+        console.error(error)
+        alert('アカウントの削除に失敗しました')
       }
-    };
+    }
 
-    // 初期データの取得
-    onMounted(() => {
-      fetchUser();
-    });
+    onMounted(fetchUser)
 
     return {
       username,
@@ -124,12 +114,10 @@ export default {
       newPasswordConfirmation,
       updateSettings,
       confirmDeleteAccount,
-    };
+    }
   },
-};
+}
 </script>
-
-
 
 <style scoped>
 label {

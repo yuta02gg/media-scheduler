@@ -7,7 +7,11 @@
     <div v-else>
       <div v-if="rankedWorks.length === 0">レビューがまだありません。</div>
       <ul v-else class="ranking-container">
-        <li v-for="(work, index) in rankedWorks" :key="work.media_id" class="ranking-item">
+        <li
+          v-for="(work, index) in rankedWorks"
+          :key="work.media_id"
+          class="ranking-item"
+        >
           <span class="rank">第{{ index + 1 }}位</span>
           <img
             v-if="work.poster_path"
@@ -45,6 +49,7 @@ export default {
     const rankedWorks = ref([])
     const loading = ref(true)
 
+    // ランキング取得
     const loadRanking = async () => {
       loading.value = true
       try {
@@ -65,13 +70,11 @@ export default {
 
     onMounted(loadRanking)
 
-    const getPosterUrl = (path) => {
-      return path ? `https://image.tmdb.org/t/p/w200${path}` : '/placeholder-image.jpg'
-    }
+    const getPosterUrl = (path) =>
+      path ? `https://image.tmdb.org/t/p/w200${path}` : '/placeholder-image.jpg'
 
-    const isNumber = (value) => {
-      return typeof value === 'number' && !isNaN(value)
-    }
+    const isNumber = (value) =>
+      typeof value === 'number' && !isNaN(value)
 
     return {
       rankedWorks,
@@ -147,7 +150,7 @@ export default {
   border-radius: 5px;
   text-align: center;
   text-decoration: none;
-  width: 150px; /* ボタンの幅を統一 */
+  width: 150px; /* ボタンの幅 */
 }
 
 .view-reviews-button:hover {

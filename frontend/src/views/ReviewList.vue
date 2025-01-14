@@ -20,13 +20,21 @@
         </div>
       </div>
 
-      <div v-if="reviews.length === 0">この作品のレビューはまだありません。</div>
+      <div v-if="reviews.length === 0">
+        この作品のレビューはまだありません。
+      </div>
       <ul v-else class="reviews-container">
-        <li v-for="review in reviews" :key="review.id" class="review-item">
+        <li
+          v-for="review in reviews"
+          :key="review.id"
+          class="review-item"
+        >
           <div class="review-content">
             <p class="rating">評価: {{ review.rating }}</p>
             <p class="comment">{{ review.comment }}</p>
-            <p class="user">投稿者: {{ review.user ? review.user.username : '匿名' }}</p>
+            <p class="user">
+              投稿者: {{ review.user ? review.user.username : '匿名' }}
+            </p>
             <p class="date">投稿日: {{ formatDate(review.created_at) }}</p>
           </div>
         </li>
@@ -45,18 +53,21 @@ export default {
   setup() {
     const route = useRoute()
     const router = useRouter()
+
     const mediaType = ref(route.params.media_type || null)
     const tmdb_id = ref(route.params.tmdb_id || null)
     const reviews = ref([])
     const media = ref({})
     const loading = ref(true)
 
+    // レビュー読み込み
     const loadReviews = async () => {
       loading.value = true
       try {
         if (mediaType.value && tmdb_id.value) {
-          console.log(`Fetching reviews for mediaType: ${mediaType.value}, tmdb_id: ${tmdb_id.value}`)
-          const response = await axios.get(`/media/${mediaType.value}/${tmdb_id.value}/reviews`)
+          const response = await axios.get(
+            `/media/${mediaType.value}/${tmdb_id.value}/reviews`
+          )
           reviews.value = response.data.reviews || []
           media.value = response.data.media || {}
         } else {
@@ -69,13 +80,12 @@ export default {
       }
     }
 
-    // 前に戻る関数を追加
+    // 前に戻る
     const goBack = () => {
       router.push('/reviews')
     }
 
-    onMounted(loadReviews)
-
+    // ルートパラメータが変わった場合の再取得
     watch(
       () => route.params,
       (newParams) => {
@@ -93,21 +103,20 @@ export default {
       return '日付不明'
     }
 
-    const getPosterUrl = (path) => {
-      return path ? `https://image.tmdb.org/t/p/w200${path}` : '/placeholder-image.jpg'
-    }
+    const getPosterUrl = (path) =>
+      path ? `https://image.tmdb.org/t/p/w200${path}` : '/placeholder-image.jpg'
+
+    onMounted(loadReviews)
 
     return {
       reviews,
-      mediaType,
-      tmdb_id,
       media,
       loading,
+      goBack,
       formatDate,
       getPosterUrl,
-      goBack, // 追加
     }
-  }
+  },
 }
 </script>
 
@@ -122,7 +131,7 @@ export default {
   color: #555;
 }
 
-/* 前に戻るボタンのスタイルを追加 */
+/* 前に戻るボタン */
 .back-button {
   background-color: #007bff;
   color: #fff;

@@ -10,8 +10,7 @@ use Carbon\Carbon;
 
 class SendReminders extends Command
 {
-    protected $signature = 'reminders:send';
-
+    protected $signature   = 'reminders:send';
     protected $description = 'リマインダーを送信します';
 
     public function handle()
@@ -23,12 +22,12 @@ class SendReminders extends Command
                               ->get();
 
         foreach ($reminders as $reminder) {
-            $user = $reminder->user;
+            $user  = $reminder->user;
             $media = $reminder->media;
 
             Mail::to($user->email)->send(new ReminderMail($user, $media));
 
-            // リマインダー時間をnullにして、再度送信されないようにする
+            // 1度送信したらリマインダー時間をnullにして、再度送信されないようにする
             $reminder->reminder_time = null;
             $reminder->save();
         }

@@ -1,5 +1,4 @@
 // src/router/index.js
-
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/Home.vue'
 import UserLogin from '../views/Login.vue'
@@ -44,7 +43,7 @@ const routes = [
     path: '/mypage',
     name: 'MyPage',
     component: MyPageComponent,
-    meta: { title: 'マイページ' },
+    meta: { title: 'マイページ', requiresAuth: true },
   },
   {
     path: '/search',
@@ -53,7 +52,7 @@ const routes = [
     meta: { title: '作品検索' },
   },
   {
-    path: '/work/:media_type/:id',
+    path: '/work/:media_type/:id', 
     name: 'WorkDetail',
     component: WorkDetail,
     props: true,
@@ -63,27 +62,27 @@ const routes = [
     path: '/schedule',
     name: 'ScheduleManagement',
     component: ScheduleManagement,
-    meta: { title: 'スケジュール管理' },
+    meta: { title: 'スケジュール管理', requiresAuth: true },
   },
   {
     path: '/reminder',
     name: 'ReminderSettings',
     component: ReminderSettings,
-    meta: { title: 'リマインダー設定' },
+    meta: { title: 'リマインダー設定', requiresAuth: true },
   },
   // レビューの新規投稿用ルート
   {
     path: '/review/post',
     name: 'ReviewPostSelect',
     component: ReviewPost,
-    meta: { title: 'レビュー投稿' },
+    meta: { title: 'レビュー投稿', requiresAuth: true },
   },
   {
     path: '/review/:media_type/:id',
     name: 'ReviewPost',
     component: ReviewPost,
     props: true,
-    meta: { title: 'レビュー投稿' },
+    meta: { title: 'レビュー投稿', requiresAuth: true },
   },
   // レビュー一覧表示用のルート
   {
@@ -93,17 +92,17 @@ const routes = [
     meta: { title: 'レビューランキング' },
   },
   {
-    path: '/media/:media_type/:tmdb_id/reviews',
+    path: '/media/:media_type/:id/reviews',
     name: 'ReviewList',
     component: ReviewList,
     props: true,
-    meta: { title: 'レビュー一覧' },
+    meta: { title: 'レビュー一覧', requiresAuth: true },
   },
   {
     path: '/settings',
     name: 'UserSettings',
     component: UserSettings,
-    meta: { title: '設定' },
+    meta: { title: '設定', requiresAuth: true },
   },
   // 管理者ダッシュボード
   {
@@ -128,7 +127,7 @@ const routes = [
   },
   // ユーザーごとのレビュー管理
   {
-    path: '/admin/users/:id/reviews',
+    path: '/admin/users/:id/reviews', 
     name: 'AdminUserReviews',
     component: AdminReviewManagement,
     props: true,

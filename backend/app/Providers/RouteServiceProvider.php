@@ -2,54 +2,53 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Route;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
     /**
-     * この名前空間はコントローラールートで適用されます。
+     * The path to the "home" route for your application.
      *
-     * @var string|null
+     * This is used by Laravel authentication to redirect users after login.
+     *
+     * @var string
      */
-    // protected $namespace = 'App\\Http\\Controllers'; // コメントアウトまたは削除
+    public const HOME = '/home';
 
     /**
-     * アプリケーションのルートサービスを定義します。
+     * Define your route model bindings, pattern filters, etc.
      *
      * @return void
      */
-    public function map()
+    public function boot()
     {
-        $this->mapApiRoutes();
+        $this->configureRateLimiting();
 
-        $this->mapWebRoutes();
+        $this->routes(function () {
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/api.php'));
 
-        // 他のルートマッピングがあればここに追加
+            Route::middleware('web')
+                ->group(base_path('routes/web.php'));
+        });
     }
 
     /**
-     * "web" ミドルウェアグループ内の "web" ルートを定義します。
+     * Configure the rate limiters for the application.
      *
      * @return void
      */
-    protected function mapWebRoutes()
+    protected function configureRateLimiting()
     {
-        Route::middleware('web')
-            // ->namespace($this->namespace) // コメントアウトまたは削除
-            ->group(base_path('routes/web.php'));
-    }
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
+        });
 
-    /**
-     * "api" ミドルウェアグループ内の "api" ルートを定義します。
-     *
-     * @return void
-     */
-    protected function mapApiRoutes()
-    {
-        Route::prefix('api')
-            ->middleware('api')
-            // ->namespace($this->namespace) // コメントアウトまたは削除
-            ->group(base_path('routes/api.php'));
+        // 必要に応じて他のレートリミッターも定義できます
     }
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="admin-review-management">
     <h2>ユーザーのレビュー管理</h2>
-    
+
     <!-- レビューフィルタセクション -->
     <div class="filter-section">
       <input
@@ -18,11 +18,15 @@
       />
       <select v-model="filterRatingMin" class="filter-select">
         <option value="">最低評価</option>
-        <option v-for="n in 5" :key="'min-' + n" :value="n">{{ n }} 星以上</option>
+        <option v-for="n in 5" :key="'min-' + n" :value="n">
+          {{ n }} 星以上
+        </option>
       </select>
       <select v-model="filterRatingMax" class="filter-select">
         <option value="">最高評価</option>
-        <option v-for="n in 5" :key="'max-' + n" :value="n">{{ n }} 星以下</option>
+        <option v-for="n in 5" :key="'max-' + n" :value="n">
+          {{ n }} 星以下
+        </option>
       </select>
       <input
         type="date"
@@ -39,7 +43,7 @@
       <button @click="applyFilters" class="filter-button">フィルタ適用</button>
       <button @click="resetFilters" class="reset-button">リセット</button>
     </div>
-    
+
     <div v-if="loading" class="loading">
       <p>レビュー一覧を読み込み中...</p>
     </div>
@@ -66,14 +70,16 @@
             <td>{{ formatDate(review.created_at) }}</td>
             <td>{{ review.comment }}</td>
             <td>
-              <button @click="deleteReview(review.id)" class="delete-button">削除</button>
+              <button @click="deleteReview(review.id)" class="delete-button">
+                削除
+              </button>
             </td>
           </tr>
         </tbody>
       </table>
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     </div>
-    
+
     <!-- レビュー削除確認モーダル -->
     <div v-if="showDeleteModal" class="modal">
       <div class="modal-content">
@@ -102,7 +108,7 @@ export default {
     const loading = ref(true)
     const errorMessage = ref('')
 
-    // フィルタリング用のリファレンス
+    // フィルタリング
     const filterUsername = ref('')
     const filterMediaTitle = ref('')
     const filterRatingMin = ref('')
@@ -110,15 +116,17 @@ export default {
     const filterDateFrom = ref('')
     const filterDateTo = ref('')
 
-    // レビュー削除用
+    // モーダル
     const showDeleteModal = ref(false)
     const reviewToDelete = ref(null)
 
     const loadReviews = async (filters = {}) => {
       loading.value = true
       try {
-        const params = { ...filters, user_id: userId.value } // ユーザーIDをフィルタに追加
-        const response = await axios.get(`/admin/users/${userId.value}/reviews`, { params })
+        const params = { ...filters, user_id: userId.value }
+        const response = await axios.get(`/admin/users/${userId.value}/reviews`, {
+          params,
+        })
         reviews.value = response.data
         errorMessage.value = ''
       } catch (error) {
@@ -137,9 +145,11 @@ export default {
     const confirmDelete = async () => {
       try {
         await axios.delete(`/admin/reviews/${reviewToDelete.value}`)
-        reviews.value = reviews.value.filter(review => review.id !== reviewToDelete.value)
-        errorMessage.value = ''
+        reviews.value = reviews.value.filter(
+          (review) => review.id !== reviewToDelete.value
+        )
         alert('レビューが削除されました。')
+        errorMessage.value = ''
       } catch (error) {
         console.error('レビューの削除に失敗しました。', error)
         errorMessage.value = 'レビューの削除に失敗しました。'
@@ -157,7 +167,9 @@ export default {
     const formatDate = (dateStr) => {
       if (!dateStr) return ''
       const date = new Date(dateStr)
-      return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}`
+      return `${date.getFullYear()}-${(date.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`
     }
 
     const applyFilters = () => {
@@ -202,7 +214,7 @@ export default {
       formatDate,
       reviewToDelete,
     }
-  }
+  },
 }
 </script>
 
@@ -291,7 +303,7 @@ export default {
   font-weight: bold;
 }
 
-/* モーダルのスタイル */
+/* モーダル */
 .modal {
   position: fixed;
   top: 0;

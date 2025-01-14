@@ -13,7 +13,11 @@
       </label>
       <label>
         リマインダー日時:
-        <input type="datetime-local" v-model="reminderTime" required />
+        <input
+          type="datetime-local"
+          v-model="reminderTime"
+          required
+        />
       </label>
       <button type="submit">設定</button>
     </form>
@@ -33,6 +37,7 @@ export default {
     const reminderTime = ref('')
     const message = ref('')
 
+    // ユーザーが登録した作品一覧を取得
     const fetchWorks = async () => {
       try {
         const response = await axios.get('/user/registered-works')
@@ -42,12 +47,12 @@ export default {
       }
     }
 
+    // リマインダーを設定
     const setReminder = async () => {
       if (!selectedWork.value || !reminderTime.value) {
         message.value = '作品と日時を選択してください。'
         return
       }
-
       try {
         await axios.post('/reminders', {
           work_id: selectedWork.value,
@@ -60,16 +65,14 @@ export default {
       }
     }
 
-    onMounted(() => {
-      fetchWorks()
-    })
+    onMounted(fetchWorks)
 
     return {
       works,
       selectedWork,
       reminderTime,
-      setReminder,
       message,
+      setReminder,
     }
   },
 }

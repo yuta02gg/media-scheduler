@@ -3,32 +3,34 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class RegisterController extends Controller
 {
+    // POST /api/register
     public function register(Request $request)
     {
-        $data = $request->validate([
-            'username' => 'required|string|max:50',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
+        $request->validate([
+            'username' => 'required|string|max:255|unique:users', // 'username' をユニークに設定
+            'email' => 'required|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed', // 'password_confirmation' を期待
         ]);
 
         $user = User::create([
-            'username' => $data['username'],
-            'email'    => $data['email'],
-            'password' => Hash::make($data['password']),
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
         ]);
 
-        $token = $user->createToken('authToken')->plainTextToken;
+        // Create a new personal access token
+        $token = $user->createToken('access_token')->plainTextToken;
 
         return response()->json([
-            'user'         => $user,
             'access_token' => $token,
-            'token_type'   => 'Bearer',
-        ]);
+            'user' => $user,
+        ], 201);
     }
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="admin-user-management">
     <h2>ユーザー管理</h2>
-    
+
     <!-- ユーザー検索セクション -->
     <div class="search-section">
       <input
@@ -19,7 +19,7 @@
       <button @click="searchUsers" class="search-button">検索</button>
       <button @click="resetSearch" class="reset-button">リセット</button>
     </div>
-    
+
     <div v-if="loading" class="loading">
       <p>ユーザー一覧を読み込み中...</p>
     </div>
@@ -45,17 +45,24 @@
             <td>{{ user.is_admin ? 'はい' : 'いいえ' }}</td>
             <td>{{ formatDate(user.created_at) }}</td>
             <td>
-              <button @click="deleteUser(user.id)" class="delete-button">削除</button>
+              <button @click="deleteUser(user.id)" class="delete-button">
+                削除
+              </button>
             </td>
             <td>
-              <router-link :to="{ name: 'AdminUserReviews', params: { id: user.id } }" class="review-link">レビュー管理</router-link>
+              <router-link
+                :to="{ name: 'AdminUserReviews', params: { id: user.id } }"
+                class="review-link"
+              >
+                レビュー管理
+              </router-link>
             </td>
           </tr>
         </tbody>
       </table>
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     </div>
-    
+
     <!-- ユーザー削除確認モーダル -->
     <div v-if="showDeleteModal" class="modal">
       <div class="modal-content">
@@ -79,12 +86,12 @@ export default {
     const users = ref([])
     const loading = ref(true)
     const errorMessage = ref('')
-    
-    // 検索用のリファレンス
+
+    // 検索用
     const searchUsername = ref('')
     const searchEmail = ref('')
-    
-    // ユーザー削除用
+
+    // 削除モーダル
     const showDeleteModal = ref(false)
     const userToDelete = ref(null)
 
@@ -134,9 +141,9 @@ export default {
     const confirmDelete = async () => {
       try {
         await axios.delete(`/admin/users/${userToDelete.value}`)
-        users.value = users.value.filter(user => user.id !== userToDelete.value)
-        errorMessage.value = ''
+        users.value = users.value.filter((u) => u.id !== userToDelete.value)
         alert('ユーザーが削除されました。')
+        errorMessage.value = ''
       } catch (error) {
         console.error('ユーザーの削除に失敗しました。', error)
         errorMessage.value = 'ユーザーの削除に失敗しました。'
@@ -154,7 +161,9 @@ export default {
     const formatDate = (dateStr) => {
       if (!dateStr) return ''
       const date = new Date(dateStr)
-      return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}`
+      return `${date.getFullYear()}-${(date.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`
     }
 
     onMounted(loadUsers)
@@ -173,7 +182,7 @@ export default {
       closeDeleteModal,
       formatDate,
     }
-  }
+  },
 }
 </script>
 
@@ -228,7 +237,8 @@ export default {
   margin-top: 1em;
 }
 
-.user-table th, .user-table td {
+.user-table th,
+.user-table td {
   border: 1px solid #ddd;
   padding: 0.5em;
   text-align: left;
@@ -266,7 +276,7 @@ export default {
   font-weight: bold;
 }
 
-/* モーダルのスタイル */
+/* モーダル */
 .modal {
   position: fixed;
   top: 0;

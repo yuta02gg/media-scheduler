@@ -1,3 +1,4 @@
+<!-- src/App.vue -->
 <template>
   <div id="app">
     <header class="header">
@@ -27,11 +28,9 @@
 
     <main>
       <h1 class="page-title">{{ pageTitle }}</h1>
-      <router-view v-slot="{ Component }">
-        <keep-alive include="WorkSearch">
-          <component :is="Component" />
-        </keep-alive>
-      </router-view>
+      <keep-alive include="WorkSearch">
+        <router-view />
+      </keep-alive>
     </main>
   </div>
 </template>
@@ -59,7 +58,6 @@ export default {
     const logout = async () => {
       try {
         await store.dispatch('logout')
-        // ログアウト後にホームページにリダイレクト
         router.push('/')
       } catch (error) {
         console.error('ログアウトに失敗しました。', error)
@@ -100,7 +98,7 @@ export default {
 </script>
 
 <style scoped>
-/* リセットと基本スタイル */
+/* リセット */
 * {
   margin: 0;
   padding: 0;
@@ -117,7 +115,7 @@ a {
   color: inherit;
 }
 
-/* ヘッダーのスタイル */
+/* ヘッダー */
 .header {
   display: flex;
   align-items: center;
@@ -142,8 +140,8 @@ a {
   justify-content: space-around;
   width: 30px;
   height: 24px;
-  background: transparent;
   border: none;
+  background: transparent;
   cursor: pointer;
 }
 
@@ -171,19 +169,17 @@ a {
   color: #ffe0d1;
 }
 
-/* 現在のページタイトル */
 .page-title {
   font-size: 2em;
   margin: 1em;
   text-align: center;
 }
 
-/* レスポンシブ対応 */
+/* レスポンシブ */
 @media (max-width: 768px) {
   .hamburger {
     display: flex;
   }
-
   .nav-menu {
     flex-direction: column;
     position: absolute;
@@ -195,18 +191,12 @@ a {
     transition: transform 0.3s ease-in-out;
     z-index: 1000;
   }
-
   .nav-menu.is-active {
     transform: translateX(0);
   }
-
   .nav-menu li {
     margin: 0;
     padding: 1em;
-  }
-
-  .nav-menu li a {
-    display: block;
   }
 }
 </style>

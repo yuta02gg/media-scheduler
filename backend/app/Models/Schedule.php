@@ -16,13 +16,11 @@ class Schedule extends Model
         'date',
     ];
 
-    // ユーザーとのリレーション
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // メディア（作品）とのリレーション
     public function media()
     {
         return $this->belongsTo(Media::class);

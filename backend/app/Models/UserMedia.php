@@ -19,8 +19,7 @@ class UserMedia extends Model
         'notification_type',
     ];
 
-    // タイムスタンプの自動更新を有効にする
-    public $timestamps = true;
+    public $timestamps = true; // 明示的に設定
 
     public function user()
     {
@@ -31,5 +30,4 @@ class UserMedia extends Model
     {
         return $this->belongsTo(Media::class);
     }
-
 }
