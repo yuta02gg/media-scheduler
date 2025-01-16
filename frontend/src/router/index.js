@@ -52,7 +52,7 @@ const routes = [
     meta: { title: '作品検索' },
   },
   {
-    path: '/work/:media_type/:id', 
+    path: '/media/:media_type/:tmdb_id', 
     name: 'WorkDetail',
     component: WorkDetail,
     props: true,
@@ -92,7 +92,7 @@ const routes = [
     meta: { title: 'レビューランキング' },
   },
   {
-    path: '/media/:media_type/:id/reviews',
+    path: '/media/:media_type/:tmdb_id/reviews',
     name: 'ReviewList',
     component: ReviewList,
     props: true,

@@ -7,13 +7,18 @@
     <div v-else-if="errorMessage" class="error">{{ errorMessage }}</div>
     <div v-else>
       <div class="work-detail">
-        <img :src="getPosterUrl(work.poster_path)" :alt="`${work.title || work.name}のポスター画像`" class="poster-img" />
+        <img
+          :src="getPosterUrl(work.poster_path)"
+          :alt="`${work.title || work.name}のポスター画像`"
+          class="poster-img"
+        />
         <div class="detail-info">
           <h1>{{ work.title || work.name }}</h1>
           <p><strong>公開日:</strong> {{ formatDate(work.release_date || work.first_air_date) }}</p>
           <p><strong>あらすじ:</strong> {{ work.overview || 'あらすじはありません。' }}</p>
           
           <div class="button-group">
+            <!-- DBのIDで登録判定 -->
             <button
               v-if="isLoggedIn && !isRegistered(work.media_type, work.id)"
               @click="registerWork(work)"
@@ -21,14 +26,25 @@
             >
               登録する
             </button>
-            <p v-else-if="isRegistered(work.media_type, work.id)" class="registered-message">登録済みの作品です</p>
+            <p
+              v-else-if="isRegistered(work.media_type, work.id)"
+              class="registered-message"
+            >
+              登録済みの作品です
+            </p>
             
-            <router-link :to="`/work/${work.media_type}/${work.id}/reviews`" class="review-link">レビューを見る</router-link>
+            <!-- レビューを見る (ルートURLは tmdb_id) -->
+            <router-link
+              :to="`/media/${work.media_type}/${work.tmdb_id}/reviews`"
+              class="review-link"
+            >
+              レビューを見る
+            </router-link>
           </div>
         </div>
       </div>
       
-      <!-- レビューセクションなど他のコンテンツ -->
+      <!-- 他のコンテンツがあれば追加 -->
     </div>
   </div>
 </template>
@@ -56,16 +72,17 @@ export default {
       isLoading.value = true
       errorMessage.value = ''
 
-      const { media_type, id } = route.params // 'tmdb_id'から 'id'に変更
-
-      if (!id) {
-        errorMessage.value = '無効な作品IDです。'
-        isLoading.value = false
-        return
-      }
+      const { media_type, tmdb_id } = route.params
+      if (!media_type || !tmdb_id) {
+         errorMessage.value = '無効な作品IDです。（media_type または tmdb_id がありません）'
+         isLoading.value = false
+         return
+       }
 
       try {
-        const response = await axios.get(`/media/${media_type}/${id}`)
+        // バックエンドで tmdb_id をキーに検索し、
+        // DBのID (id) も含めて返してもらう
+        const response = await axios.get(`/media/${media_type}/${tmdb_id}`)
         work.value = response.data
       } catch (error) {
         console.error('作品詳細の取得に失敗しました。', error)
@@ -81,24 +98,24 @@ export default {
       }
     }
 
-    onMounted(async () => {
-      await fetchWorkDetail()
-    })
+    onMounted(fetchWorkDetail)
 
-    const isRegistered = (media_type, workId) => {
-      return store.getters.isRegistered(media_type, workId)
+    // DBのIDで判定
+    const isRegistered = (media_type, dbId) => {
+      return store.getters.isRegistered(media_type, dbId)
     }
 
+    // DBのIDで登録
     const registerWork = async (workItem) => {
       if (!isLoggedIn.value) {
         alert('作品を登録するにはログインが必要です。')
         router.push('/login')
         return
       }
-
       try {
+        // DBのIDを送る
         await store.dispatch('registerWork', {
-          media_id: workItem.id,
+          tmdb_id: workItem.tmdb_id,
           media_type: workItem.media_type
         })
         alert('作品を登録しました。')
@@ -109,16 +126,17 @@ export default {
     }
 
     const getPosterUrl = (path) => {
-      return path ? `https://image.tmdb.org/t/p/w300${path}` : '/placeholder-image.jpg'
+      return path
+        ? `https://image.tmdb.org/t/p/w300${path}`
+        : '/placeholder-image.jpg'
     }
 
     const formatDate = (dateString) => {
       if (dateString) {
         const date = new Date(dateString)
         return date.toLocaleDateString('ja-JP')
-      } else {
-        return '公開日不明'
       }
+      return '公開日不明'
     }
 
     const goBack = () => {

@@ -30,10 +30,10 @@ Route::get('/generate-vapid-keys', function () {
 Route::get('/media/search', [MediaController::class, 'search']);
 
 // ----- レビュー（ログイン不要）-----
-Route::get('/media/{media_type}/{media_id}/reviews', [ReviewController::class, 'index'])
+Route::get('/media/{media_type}/{tmdb_id}/reviews', [ReviewController::class, 'index'])
     ->where([
         'media_type' => 'movie|tv',
-        'media_id'   => '[0-9]+',
+        'tmdb_id'   => '[0-9]+',
     ]);
 
 // 全レビュー
@@ -43,10 +43,10 @@ Route::get('/reviews', [ReviewController::class, 'getAllReviews']);
 Route::get('/reviews/ranking', [ReviewController::class, 'getReviewRanking']);
 
 // メディア詳細
-Route::get('/media/{media_type}/{media_id}', [MediaController::class, 'show'])
+Route::get('/media/{media_type}/{tmdb_id}', [MediaController::class, 'show'])
     ->where([
         'media_type' => 'movie|tv',
-        'media_id'   => '[0-9]+',
+        'tmdb_id'   => '[0-9]+',
     ]);
 
 // ログイン・登録
@@ -83,7 +83,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::pattern('media_id', '[0-9]+');
 
     // メディア登録
-    Route::post('/media/{media_type}/{media_id}/register', [MediaController::class, 'register']);
+    Route::post('/media/{media_type}/{tmdb_id}/register', [MediaController::class, 'register'])
+    ->where([
+        'media_type' => 'movie|tv',
+        'tmdb_id'    => '[0-9]+',
+    ]);
+
     Route::get('/media/{media_type}/{media_id}/is-registered', [MediaController::class, 'isRegistered']);
 
     // 登録作品一覧

@@ -54,8 +54,8 @@ export default {
     const route = useRoute()
     const router = useRouter()
 
-    const mediaType = ref(route.params.media_type || null)
-    const tmdb_id = ref(route.params.tmdb_id || null)
+    const mediaType = ref(route.params.media_type)
+    const tmdb_id = ref(route.params.tmdb_id)
     const reviews = ref([])
     const media = ref({})
     const loading = ref(true)
@@ -65,9 +65,7 @@ export default {
       loading.value = true
       try {
         if (mediaType.value && tmdb_id.value) {
-          const response = await axios.get(
-            `/media/${mediaType.value}/${tmdb_id.value}/reviews`
-          )
+          const response = await axios.get(`/media/${mediaType.value}/${tmdb_id.value}/reviews`)
           reviews.value = response.data.reviews || []
           media.value = response.data.media || {}
         } else {
@@ -89,8 +87,8 @@ export default {
     watch(
       () => route.params,
       (newParams) => {
-        mediaType.value = newParams.media_type || null
-        tmdb_id.value = newParams.tmdb_id || null
+        mediaType.value = newParams.media_type
+        tmdb_id.value = newParams.tmdb_id
         loadReviews()
       }
     )

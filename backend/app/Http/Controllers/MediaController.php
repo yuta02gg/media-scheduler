@@ -56,15 +56,27 @@ class MediaController extends Controller
     }
 
     // 詳細情報取得
-    public function show($media_type, $media_id)
+    public function show($media_type, $tmdb_id)
     {
         try {
             // tmdb_id を使用してメディア詳細を取得
-            $media = $this->tmdbService->getMediaDetails($media_type, $media_id);
+            $dbMedia = Media::where('tmdb_id', $tmdb_id)->first();
+
+            $media = $this->tmdbService->getMediaDetails($media_type, $tmdb_id);
 
             if ($media) {
                 // media_type をレスポンスに含める
                 $media['media_type'] = $media_type;
+
+                if ($dbMedia) {
+                    $media['media_type'] = $media_type;
+                } else {
+                    $media['id'] = null;
+                }
+
+
+
+
                 return response()->json($media);
             } else {
                 return response()->json(['message' => 'Media not found'], 404);
@@ -78,20 +90,20 @@ class MediaController extends Controller
     }
 
     // メディア登録
-    public function register(Request $request, $media_type, $media_id)
+    public function register(Request $request, $media_type, $tmdb_id)
     {
         DB::beginTransaction();
         try {
             $user = Auth::user();
 
             // TMDbから作品詳細を取得
-            $mediaDetails = $this->tmdbService->getMediaDetails($media_type, $media_id);
+            $mediaDetails = $this->tmdbService->getMediaDetails($media_type, $tmdb_id);
             if (!$mediaDetails) {
                 return response()->json(['message' => 'Media not found'], 404);
             }
 
             // 既に登録されているか確認
-            $isRegistered = $user->media()->where('tmdb_id', $media_id)->exists();
+            $isRegistered = $user->media()->where('tmdb_id', $tmdb_id)->exists();
             if ($isRegistered) {
                 return response()->json([
                     'message' => 'この作品は既に登録されています。'
@@ -100,7 +112,7 @@ class MediaController extends Controller
 
             // メディア情報を保存
             $media = Media::firstOrCreate(
-                ['tmdb_id' => $media_id],
+                ['tmdb_id' => $tmdb_id],
                 [
                     'title'        => $mediaDetails['title'] ?? $mediaDetails['name'] ?? 'タイトル不明',
                     'release_date' => $mediaDetails['release_date'] ?? $mediaDetails['first_air_date'] ?? null,

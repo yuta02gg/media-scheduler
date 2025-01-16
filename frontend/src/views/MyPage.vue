@@ -9,7 +9,7 @@
       <li v-for="work in registeredWorks" :key="work.id" class="work-item">
         <!-- 画像をリンク化 -->
         <router-link
-          :to="`/work/${work.media_type}/${work.tmdb_id}`"
+          :to="`/media/${work.media_type}/${work.tmdb_id}`"
           class="poster-link"
         >
           <img
@@ -20,7 +20,7 @@
         </router-link>
         <div class="work-info">
           <router-link
-            :to="`/work/${work.media_type}/${work.tmdb_id}`"
+            :to="`/media/${work.media_type}/${work.tmdb_id}`"
             class="work-title"
           >
             {{ getTitle(work) }}

@@ -49,10 +49,10 @@ class ReviewController extends Controller
     /**
      * 特定のメディアのレビュー一覧取得
      */
-    public function index($mediaType, $mediaId)
+    public function index($mediaType, $tmdbId)
     {
         // メディア取得、なければ TMDb API から取得して作成
-        $media = Media::where('tmdb_id', $mediaId)->first();
+        $media = Media::where('tmdb_id', $tmdbId)->first();
         if (!$media) {
             $apiKey = config('services.tmdb.api_key');
             $response = Http::get("https://api.themoviedb.org/3/{$mediaType}/{$mediaId}", [

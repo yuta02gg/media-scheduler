@@ -25,10 +25,17 @@
     <div v-if="isLoading" class="loading">検索中...</div>
     <div v-else>
       <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-      <p v-if="filteredWorks.length === 0 && hasSearched">検索結果が見つかりませんでした。</p>
+      <p v-if="filteredWorks.length === 0 && hasSearched">
+        検索結果が見つかりませんでした。
+      </p>
       <ul v-else class="works-grid">
-        <li v-for="work in filteredWorks" :key="`${work.media_type || 'unknown'}-${work.id}`" class="work-item">
-          <router-link :to="`/work/${work.media_type || 'movie'}/${work.id}`">
+        <li
+          v-for="work in filteredWorks"
+          :key="`${work.media_type || 'unknown'}-${work.id}`"
+          class="work-item"
+        >
+          <!-- ルートURLには tmdb_id を使う -->
+          <router-link :to="`/media/${work.media_type}/${work.tmdb_id}`">
             <img
               :src="getPosterUrl(work.poster_path)"
               :alt="`${work.title || work.name}のポスター画像`"
@@ -36,10 +43,12 @@
             />
           </router-link>
           <div class="work-info">
-            <router-link :to="`/work/${work.media_type || 'movie'}/${work.id}`">
+            <router-link :to="`/media/${work.media_type}/${work.tmdb_id}`">
               <h3>{{ work.title || work.name }}</h3>
             </router-link>
             <p>公開日: {{ formatDate(work.release_date || work.first_air_date) }}</p>
+
+            <!-- 作品登録ボタン (DBのIDを使う) -->
             <button
               v-if="isLoggedIn && !isRegistered(work.media_type, work.id)"
               @click="registerWork(work)"
@@ -47,17 +56,39 @@
             >
               登録する
             </button>
-            <p v-else-if="isRegistered(work.media_type, work.id)" class="registered-message">登録済みの作品です</p>
+            <p
+              v-else-if="isRegistered(work.media_type, work.id)"
+              class="registered-message"
+            >
+              登録済みの作品です
+            </p>
           </div>
         </li>
       </ul>
+
+      <!-- ページネーション -->
       <div v-if="totalPages > 1" class="pagination">
-        <button @click="prevPage" :disabled="page === 1" class="pagination-button">前のページ</button>
+        <button
+          @click="prevPage"
+          :disabled="page === 1"
+          class="pagination-button"
+        >
+          前のページ
+        </button>
         <span>{{ page }} / {{ totalPages }}</span>
-        <button @click="nextPage" :disabled="page === totalPages" class="pagination-button">次のページ</button>
+        <button
+          @click="nextPage"
+          :disabled="page === totalPages"
+          class="pagination-button"
+        >
+          次のページ
+        </button>
       </div>
-      <!-- 全体的なソート適用に関する通知 -->
-      <p v-if="currentMode === 'search' && sortOption.value" class="info">
+
+      <p
+        v-if="currentMode === 'search' && sortOption.value"
+        class="info"
+      >
         現在のソートはページ内のみ適用されています。全体的な並び替えはサーバーサイドでサポートされていません。
       </p>
     </div>
@@ -74,43 +105,36 @@ export default {
   name: 'WorkSearch',
   setup() {
     const query = ref('')
-    const mediaType = ref('') // デフォルトを空に設定（すべて）
-    const sortOption = ref('') // ソートオプションのデータプロパティを追加
+    const mediaType = ref('') 
+    const sortOption = ref('')
     const works = ref([])
     const page = ref(1)
     const totalPages = ref(1)
     const isLoading = ref(false)
     const errorMessage = ref('')
     const hasSearched = ref(false)
-    const currentMode = ref('popular') // 'popular' または 'search'
+    const currentMode = ref('search')
 
     const store = useStore()
     const router = useRouter()
     const isLoggedIn = computed(() => store.getters.isAuthenticated)
 
-    // 計算済みプロパティ: media_type が存在する作品のみをフィルタリング
+    // メディアタイプがある作品のみフィルタ
     const filteredWorks = computed(() => {
       return works.value.filter(work => work.media_type)
     })
 
-    // 検索処理
+    // 検索
     const searchWorks = async () => {
       isLoading.value = true
       errorMessage.value = ''
       hasSearched.value = true
       page.value = 1
-
-      if (!query.value.trim() && !sortOption.value && !mediaType.value) {
-        // クエリ、ソートオプション、メディアタイプが空の場合、人気作品を表示
-        currentMode.value = 'popular'
-      } else {
-        currentMode.value = 'search'
-      }
-
+      currentMode.value = 'search'
       await fetchWorks()
     }
 
-    // ページネーション
+    // 次のページ
     const nextPage = async () => {
       if (page.value < totalPages.value) {
         page.value++
@@ -118,6 +142,7 @@ export default {
       }
     }
 
+    // 前のページ
     const prevPage = async () => {
       if (page.value > 1) {
         page.value--
@@ -132,21 +157,24 @@ export default {
       try {
         const params = {
           page: page.value,
-          media_type: mediaType.value || undefined, // メディアタイプを送信
+          media_type: mediaType.value || undefined,
+          query: query.value.trim() || '',
         }
-        if (currentMode.value === 'search') {
-          if (query.value.trim()) {
-            params.query = query.value
-          }
-          // TMDbの検索APIではsort_byがサポートされていないため、クライアントサイドでソート
-        } else {
-          params.sort_by = sortOption.value || 'popularity.desc'
-        }
+        // もしサーバーサイドで sort_by を受け取らないならクライアント側でソート
         const response = await axios.get('/media/search', { params })
         let results = response.data.results || []
 
-        // クライアントサイドでソート
-        if (currentMode.value === 'search' && sortOption.value) {
+        // フロントでは "tmdb_id" を使ってルートを組み立てるので、マッピングを追加する。
+        results = results.map(item => {
+          return {
+            ...item,
+            tmdb_id: item.id    // TMDb ID を tmdb_id キーにコピー
+            // ここで item.id は「DBのID」ではなく「TMDbのID」である点に注意
+          }
+        })
+
+
+        if (sortOption.value) {
           results = sortWorks(results, sortOption.value)
         }
 
@@ -161,17 +189,14 @@ export default {
       }
     }
 
-    // ソート関数を追加
+    // クライアントサイドソート
     const sortWorks = (worksArray, sortOrder) => {
       return worksArray.slice().sort((a, b) => {
         const dateA = new Date(a.release_date || a.first_air_date)
         const dateB = new Date(b.release_date || b.first_air_date)
-
         if (sortOrder === 'release_date.desc') {
-          // 新しい順
           return dateB - dateA
         } else if (sortOrder === 'release_date.asc') {
-          // 古い順
           return dateA - dateB
         } else {
           return 0
@@ -179,31 +204,31 @@ export default {
       })
     }
 
-    onMounted(async () => {
-      await fetchWorks()
+    onMounted(() => {
+      searchWorks()
     })
 
     watch(isLoggedIn, async (newVal) => {
       if (newVal) {
         await store.dispatch('loadRegisteredWorks')
       }
-      // No action needed when logged out as store handles it
     })
 
+    // DBのidを使って判定
     const isRegistered = (media_type, workId) => {
       return store.getters.isRegistered(media_type, workId)
     }
 
+    // DBのidを使って登録
     const registerWork = async (work) => {
       if (!isLoggedIn.value) {
         alert('作品を登録するにはログインが必要です。')
         router.push('/login')
         return
       }
-
       try {
         await store.dispatch('registerWork', {
-          media_id: work.id,
+          media_id: work.id,         // ★ここがDBのID
           media_type: work.media_type
         })
         alert('作品を登録しました。')
@@ -214,22 +239,23 @@ export default {
     }
 
     const getPosterUrl = (path) => {
-      return path ? `https://image.tmdb.org/t/p/w200${path}` : '/placeholder-image.jpg'
+      return path
+        ? `https://image.tmdb.org/t/p/w200${path}`
+        : '/placeholder-image.jpg'
     }
 
     const formatDate = (dateString) => {
       if (dateString) {
         const date = new Date(dateString)
         return date.toLocaleDateString('ja-JP')
-      } else {
-        return '公開日不明'
       }
+      return '公開日不明'
     }
 
     return {
       query,
-      mediaType, // メディアタイプを返却
-      sortOption, // ソートオプションを追加
+      mediaType,
+      sortOption,
       works,
       page,
       totalPages,
@@ -244,15 +270,14 @@ export default {
       prevPage,
       isRegistered,
       registerWork,
-      currentMode, // 追加
-      filteredWorks // 計算済みプロパティを返却
+      currentMode,
+      filteredWorks,
     }
-  }
+  },
 }
 </script>
 
 <style scoped>
-/* 既存のスタイルを維持 */
 .search-container {
   display: flex;
   flex-direction: column;
@@ -272,7 +297,7 @@ h1 {
   display: flex;
   justify-content: center;
   margin-bottom: 2em;
-  flex-wrap: wrap; /* フォームを折り返し可能にする */
+  flex-wrap: wrap;
 }
 
 .form-input,
@@ -283,7 +308,7 @@ h1 {
   border-radius: 4px;
   width: 250px;
   margin-right: 10px;
-  margin-bottom: 10px; /* スマホ表示で間隔を空ける */
+  margin-bottom: 10px;
 }
 
 .search-button {
@@ -294,7 +319,7 @@ h1 {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-bottom: 10px; /* スマホ表示で間隔を空ける */
+  margin-bottom: 10px;
 }
 
 .loading {
@@ -330,7 +355,6 @@ h1 {
 .poster-img {
   width: 100%;
   max-width: 180px;
-  height: auto;
   border-radius: 4px;
   transition: transform 0.3s ease;
 }
@@ -392,5 +416,5 @@ h1 {
 .registered-message {
   color: green;
   margin-top: 1em;
-} 
+}
 </style>

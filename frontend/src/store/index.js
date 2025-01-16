@@ -116,7 +116,7 @@ export default createStore({
     // 作品を登録するアクション
     async registerWork({ commit }, work) {
       try {
-        await instance.post(`/media/${work.media_type}/${work.media_id}/register`);
+        await instance.post(`/media/${work.media_type}/${work.tmdb_id}/register`);
         commit('REGISTER_WORK', work);
       } catch (error) {
         console.error('作品の登録に失敗しました。', error);
