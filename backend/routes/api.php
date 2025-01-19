@@ -64,11 +64,13 @@ Route::get('/works', [WorkController::class, 'index']);
 Route::middleware(['auth:sanctum','is_admin'])
     ->group(function () {
         // ユーザー管理
+        
         Route::get('/admin/users', [AdminUserController::class, 'index']);
         Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']);
 
         // レビュー管理
-        Route::get('/admin/reviews', [AdminReviewController::class, 'index']);
+        Route::get('/admin/users/{id}/reviews', [AdminReviewController::class, 'index']);
+        Route::get('/admin/reviews', [AdminReviewController::class, 'allReviews']);
         Route::delete('/admin/reviews/{id}', [AdminReviewController::class, 'destroy']);
     });
 
@@ -92,7 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/media/{media_type}/{media_id}/is-registered', [MediaController::class, 'isRegistered']);
 
     // 登録作品一覧
-    Route::get('/user/registered-works', [UserWorkController::class, 'index']);
+    Route::get('/user/registered-works', [UserController::class, 'getRegisteredWorks']);
 
     // レビュー投稿
     Route::post('/media/{media_type}/{media_id}/reviews', [ReviewController::class, 'store']);

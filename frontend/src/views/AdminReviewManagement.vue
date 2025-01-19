@@ -123,19 +123,25 @@ export default {
     const loadReviews = async (filters = {}) => {
       loading.value = true
       try {
-        const params = { ...filters, user_id: userId.value }
-        const response = await axios.get(`/admin/users/${userId.value}/reviews`, {
-          params,
-        })
-        reviews.value = response.data
-        errorMessage.value = ''
+        const params = { ...filters }
+        let url;
+        if (userId.value) {
+          url = `/admin/users/${userId.value}/reviews`;
+          params.user_id = userId.value; 
+        } else {
+          url = `/admin/reviews`;
+        }
+
+        const response = await axios.get(url, { params });
+        reviews.value = response.data;
+        errorMessage.value = '';
       } catch (error) {
-        console.error('レビュー一覧の取得に失敗しました。', error)
-        errorMessage.value = 'レビュー一覧の取得に失敗しました。'
+        console.error('レビュー一覧の取得に失敗しました。', error);
+        errorMessage.value = 'レビュー一覧の取得に失敗しました。';
       } finally {
-        loading.value = false
+        loading.value = false;
       }
-    }
+    };
 
     const deleteReview = (reviewId) => {
       reviewToDelete.value = reviewId

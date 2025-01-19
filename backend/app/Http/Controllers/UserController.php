@@ -4,8 +4,33 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Facades\Auth;
+
 class UserController extends Controller
 {
+
+    public function getRegisteredWorks()
+    {
+        // 1. ログインユーザーのメディア一覧を取得
+        $user = Auth::user();
+        // attach/pivot情報を含む
+        $registeredWorks = $user->media()->get();
+
+        // 2. pivot.media_id をトップレベルの media_id にコピーして返す
+        $mapped = $registeredWorks->map(function($work) {
+            return [
+                'id'         => $work->id, // DBのメディアID
+                'title'      => $work->title,
+                'media_type' => $work->media_type,
+                'media_id'   => $work->pivot->media_id, // pivotからコピー
+                'tmdb_id'    => $work->tmdb_id,     
+                'poster_path'=> $work->poster_path,
+            ];
+        });
+
+        return response()->json($mapped);
+    }
+
     // ユーザー情報を取得
     public function show(Request $request)
     {

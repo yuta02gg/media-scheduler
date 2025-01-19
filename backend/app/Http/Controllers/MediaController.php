@@ -65,17 +65,20 @@ class MediaController extends Controller
             $media = $this->tmdbService->getMediaDetails($media_type, $tmdb_id);
 
             if ($media) {
-                // media_type をレスポンスに含める
-                $media['media_type'] = $media_type;
-
+                // DB に存在する場合は DB の id を返す
                 if ($dbMedia) {
-                    $media['media_type'] = $media_type;
+                    // DB の情報を反映
+                    $media['id']         = $dbMedia->id;        // DBのオートインクリメントID
+                    $media['tmdb_id']    = $dbMedia->tmdb_id;   // TMDbのID
+                    $media['media_type'] = $dbMedia->media_type;
+                    \Log::info($media);
+
                 } else {
-                    $media['id'] = null;
+                    // DB に無い場合は id を null にし、tmdb_id をそのまま返す
+                    $media['id']         = null;
+                    $media['tmdb_id']    = $tmdb_id;
+                    $media['media_type'] = $media_type;
                 }
-
-
-
 
                 return response()->json($media);
             } else {

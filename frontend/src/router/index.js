@@ -96,7 +96,7 @@ const routes = [
     name: 'ReviewList',
     component: ReviewList,
     props: true,
-    meta: { title: 'レビュー一覧', requiresAuth: true },
+    meta: { title: 'レビュー一覧'},
   },
   {
     path: '/settings',

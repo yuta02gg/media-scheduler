@@ -114,10 +114,11 @@ export default createStore({
     },
 
     // 作品を登録するアクション
-    async registerWork({ commit }, work) {
+    async registerWork({ dispatch }, work) {
       try {
         await instance.post(`/media/${work.media_type}/${work.tmdb_id}/register`);
-        commit('REGISTER_WORK', work);
+       // 登録後に改めて取得
+        await dispatch('loadRegisteredWorks');
       } catch (error) {
         console.error('作品の登録に失敗しました。', error);
         throw error;
@@ -129,10 +130,20 @@ export default createStore({
     getUser: (state) => state.user,
     isAdmin: (state) => state.user && state.user.is_admin,
     isRegistered: (state) => (media_type, workId) => {
-      return state.registeredWorks.some(
+      console.log('--- isRegistered Check ---');
+      console.log('Media Type:', media_type);
+      console.log('Work ID:', workId);
+      state.registeredWorks.forEach((registeredWork) => {
+        console.log(`Comparing with Registered Work - media_type: ${registeredWork.media_type}, media_id: ${registeredWork.media_id}`);
+        console.log(`Types - workId: ${typeof workId}, registeredWork.media_id: ${typeof registeredWork.media_id}`);
+      });
+      const isReg = state.registeredWorks.some(
         (registeredWork) =>
           registeredWork.media_id === workId && registeredWork.media_type === media_type
-      )
-    },
+      );
+      console.log('Is Registered:', isReg);
+      return isReg;
+    }
+    
   },
 });

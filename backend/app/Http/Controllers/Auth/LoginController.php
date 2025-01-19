@@ -37,9 +37,14 @@ class LoginController extends Controller
     // POST /api/logout
     public function logout(Request $request)
     {
-        // Revoke the token that was used to authenticate the current request
-        $request->user()->currentAccessToken()->delete();
-
+        // webガード(セッション)を使用してログアウト
+        Auth::guard('web')->logout();
+    
+        // セッション破棄
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+    
         return response()->json(['message' => 'ログアウトしました。'], 200);
     }
+    
 }

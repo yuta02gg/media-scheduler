@@ -16,39 +16,36 @@ class AdminReviewController extends Controller
      * @param int $id ユーザーID
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request, $id)
+    public function allReviews(Request $request)
     {
-        $query = Review::where('user_id', $id)->with('media', 'user');
-
-        // フィルタリング
+        // $query はすべてのレビュー対象
+        $query = Review::with('media', 'user');
+    
+        // フィルタパラメータの処理（username, media_title, rating_min, etc.）は
+        // 同様に書くか、共通化してもOK
         if ($request->filled('username')) {
             $query->whereHas('user', function($q) use ($request) {
                 $q->where('username', 'like', '%' . $request->username . '%');
             });
         }
-
         if ($request->filled('media_title')) {
             $query->whereHas('media', function($q) use ($request) {
                 $q->where('title', 'like', '%' . $request->media_title . '%');
             });
         }
-
         if ($request->filled('rating_min')) {
             $query->where('rating', '>=', $request->rating_min);
         }
-
         if ($request->filled('rating_max')) {
             $query->where('rating', '<=', $request->rating_max);
         }
-
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
-
         if ($request->filled('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
-
+    
         $reviews = $query->orderBy('created_at', 'desc')->get()->map(function($review) {
             return [
                 'id' => $review->id,
@@ -60,7 +57,7 @@ class AdminReviewController extends Controller
                 'updated_at' => $review->updated_at,
             ];
         });
-
+    
         return response()->json($reviews);
     }
 

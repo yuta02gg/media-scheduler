@@ -80,7 +80,7 @@ export default {
 
     // 前に戻る
     const goBack = () => {
-      router.push('/reviews')
+      router.back()
     }
 
     // ルートパラメータが変わった場合の再取得

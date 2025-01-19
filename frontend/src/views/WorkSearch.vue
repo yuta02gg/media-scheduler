@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import axios from '../axios'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
@@ -105,7 +105,7 @@ export default {
   name: 'WorkSearch',
   setup() {
     const query = ref('')
-    const mediaType = ref('') 
+    const mediaType = ref('')
     const sortOption = ref('')
     const works = ref([])
     const page = ref(1)
@@ -168,11 +168,9 @@ export default {
         results = results.map(item => {
           return {
             ...item,
-            tmdb_id: item.id    // TMDb ID を tmdb_id キーにコピー
-            // ここで item.id は「DBのID」ではなく「TMDbのID」である点に注意
+            tmdb_id: item.id // TMDb ID を tmdb_id キーにコピー
           }
         })
-
 
         if (sortOption.value) {
           results = sortWorks(results, sortOption.value)
@@ -204,10 +202,7 @@ export default {
       })
     }
 
-    onMounted(() => {
-      searchWorks()
-    })
-
+    // watch でログイン状態を監視し、ログイン時に登録作品をロード
     watch(isLoggedIn, async (newVal) => {
       if (newVal) {
         await store.dispatch('loadRegisteredWorks')
