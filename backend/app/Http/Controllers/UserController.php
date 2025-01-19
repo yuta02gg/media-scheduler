@@ -34,9 +34,13 @@ class UserController extends Controller
     // ユーザー情報を取得
     public function show(Request $request)
     {
+        $user = $request->user();
+        
         return response()->json([
+            'id'       => $user->id,
             'username' => $request->user()->username,
             'email' => $request->user()->email,
+            'is_admin' => $user->is_admin,
         ]);
     }
 

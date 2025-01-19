@@ -95,6 +95,7 @@ export default createStore({
 
         // (B) 認証済みユーザー情報を取得 
         const { data } = await instance.get('/user');
+        console.log('checkAuth response data:', data);
         commit('SET_USER', data);
         await dispatch('loadRegisteredWorks'); // 追加
       } catch (error) {
