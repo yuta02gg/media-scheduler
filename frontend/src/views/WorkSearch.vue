@@ -223,7 +223,7 @@ export default {
       }
       try {
         await store.dispatch('registerWork', {
-          media_id: work.id,         // ★ここがDBのID
+          tmdb_id: work.tmdb_id,         
           media_type: work.media_type
         })
         alert('作品を登録しました。')
