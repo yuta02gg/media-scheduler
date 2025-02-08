@@ -39,6 +39,13 @@
           >
             スケジュールに追加
           </button>
+          <!-- 削除ボタン -->
+          <button
+            @click="deleteWork(work)"
+            class="delete-button"
+          >
+            削除
+          </button>
         </div>
       </li>
     </ul>
@@ -149,6 +156,18 @@ export default {
       }
     }
 
+    // 削除処理
+    const deleteWork = async (work) => {
+      if (!confirm("本当に削除しますか？")) return;
+      try {
+        await axios.delete(`/user/registered-works/${work.id}`);
+        registeredWorks.value = registeredWorks.value.filter(w => w.id !== work.id);
+      } catch (error) {
+        console.error("作品の削除に失敗しました。", error);
+        errorMessage.value = "作品の削除に失敗しました。";
+      }
+    }
+
     const modalWorkTitle = computed(() =>
       selectedWork.value ? getTitle(selectedWork.value) : ''
     )
@@ -171,6 +190,7 @@ export default {
       openScheduleModal,
       closeScheduleModal,
       addToSchedule,
+      deleteWork,
       modalWorkTitle,
     }
   },
@@ -269,6 +289,22 @@ export default {
 
 .schedule-button:hover {
   background-color: #218838;
+}
+
+.delete-button {
+  margin-top: 0.5em;
+  padding: 0.5em 1em;
+  background-color: #dc3545;
+  color: white;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  width: fit-content;
+  transition: background-color 0.2s;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
 }
 
 /* モーダル */

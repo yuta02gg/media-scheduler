@@ -32,7 +32,7 @@ class User extends Authenticatable
     public function media()
     {
         return $this->belongsToMany(Media::class, 'user_media')
-                    ->withPivot('status', 'reminder_time', 'notification_type')
+                    ->withPivot('id', 'status', 'reminder_time', 'notification_type')
                     ->withTimestamps();
     }
 

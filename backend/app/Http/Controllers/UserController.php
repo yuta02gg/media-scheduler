@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
 
+use App\Models\UserMedia;
+
 class UserController extends Controller
 {
 
@@ -19,7 +21,7 @@ class UserController extends Controller
         // 2. pivot.media_id をトップレベルの media_id にコピーして返す
         $mapped = $registeredWorks->map(function($work) {
             return [
-                'id'         => $work->id, // DBのメディアID
+                'id'         => $work->pivot->id, // ピボットテーブルのID
                 'title'      => $work->title,
                 'media_type' => $work->media_type,
                 'media_id'   => $work->pivot->media_id, // pivotからコピー
@@ -74,5 +76,31 @@ class UserController extends Controller
         $user->delete();
 
         return response()->json(['message' => 'アカウントが削除されました']);
+    }
+
+    //作品削除
+    public function destroyRegisteredWork($id)
+    {
+        $user = Auth::user();
+        $registeredWork = UserMedia::where('id', $id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$registeredWork) {
+            return response()->json([
+                'error' => '登録済み作品が見つからないか、権限がありません。'
+            ], 404);
+        }
+
+        try {
+            $registeredWork->delete();
+            return response()->json([
+                'message' => '登録済み作品を正常に削除しました。'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => '作品の削除に失敗しました。'
+            ], 500);
+        }
     }
 }

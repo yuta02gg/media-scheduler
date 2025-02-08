@@ -95,7 +95,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // 登録作品一覧
     Route::get('/user/registered-works', [UserController::class, 'getRegisteredWorks']);
-
+    // 登録作品削除エンドポイント
+    Route::delete('/user/registered-works/{id}', [UserController::class, 'destroyRegisteredWork']);
+    
     // レビュー投稿
     Route::post('/media/{media_type}/{media_id}/reviews', [ReviewController::class, 'store']);
 
